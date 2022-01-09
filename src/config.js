@@ -1,3 +1,9 @@
 export const config = {
-  GRAPHHOPPER_KEY: "ee041cbe-3ded-4f35-a40a-311fa040a817"
-};
+  API_URL: "http://localhost:8000/api",
+  AUTH0_CLIENTID: "hRGzWQKeaYbGv4XZcGo7m471ZU9Is9jl",
+  mapVehicleTypes: {
+    INTRACITY: {name: "Intra-City",speed: "Slow",costperkm: 10},
+    INTERCITY: {name: "Inter-City",speed: "Fast",costperkm: 15},
+    INTERSTATE: {name: "Intra City",speed: "Very Fast",costperkm: 40},
+  }
+}

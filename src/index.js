@@ -12,9 +12,15 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      speed: 0.001,
+      speed: 0.0001,
       route_polyline: [],
+      travelprocess: null,
       travel_ongoing: false,
+      vehicletype: "INTRACITY", // Intra-City, Inter-City and Inter-State
+      totalcost: 0, //Rupees
+      currentcost: 0,
+      totaldistance: 0, //kilometers
+      currentdistance: 0,
       current_routepoint: 0,
       startpoint: [],
       endpoint: [],
@@ -35,17 +41,31 @@ class App extends Component {
   };
 
   getRoute = async () => {
-    let url = `https://graphhopper.com/api/1/route?point=${this.state.startpoint[0]}%2C${this.state.startpoint[1]}&point=${this.state.endpoint[0]}%2C${this.state.endpoint[1]}1&vehicle=car&debug=false&locale=en&points_encoded=false&instructions=false&elevation=false&optimize=false&key=${config.GRAPHHOPPER_KEY}	`;
-
+    
     try {
-      const routeresponse = await axios.get(url);
+      const routeresponse = await axios.get(`${config.API_URL}/get_route?vehicle=car&startpointLat=${this.state.startpoint[0]}&startpointLng=${this.state.startpoint[1]}&endpointLat=${this.state.endpoint[0]}&endpointLng=${this.state.endpoint[1]}`);
       console.log(routeresponse.data);
       const routeData = this.convertPolyLine(
-        routeresponse.data.paths[0].points.coordinates
+        routeresponse.data.data.paths[0].points.coordinates
       );
       console.log(routeData);
 
-      this.setState({ route_polyline: routeData });
+      const distance = routeresponse.data.data.paths[0].distance;
+      let vehicletype = this.state.vehicletype;
+
+      if(distance >= 60000){
+        vehicletype = "INTERCITY";
+      }
+      else if(distance > 100000){
+        vehicletype = "INTERSTATE";
+      }
+      
+      this.setState({ 
+        route_polyline: routeData,
+        vehicletype: vehicletype,
+        currentdistance: distance,
+        currentcost: (distance/1000) * config.mapVehicleTypes[this.state.vehicletype].costperkm
+      });
     } catch (error) {
       console.error(error);
       swal("Error", "Route error. Invalid end points", "error");
@@ -64,11 +84,9 @@ class App extends Component {
     }
 
     axios
-      .get(
-        `https://graphhopper.com/api/1/geocode?q=${locationstring}&locale=de&debug=true&key=${config.GRAPHHOPPER_KEY}	`
-      )
+      .get(config.API_URL + "/geocode?locationstring="+locationstring)
       .then((res) => {
-        let data = res.data;
+        let data = res.data.data;
 
         // console.log(data.hits[0].point);
         let newpoint = [data.hits[0].point.lat, data.hits[0].point.lng];
@@ -90,11 +108,9 @@ class App extends Component {
   setEndPoint = () => {
     let locationstring = document.getElementById("endpoint").value;
     axios
-      .get(
-        `https://graphhopper.com/api/1/geocode?q=${locationstring}&locale=de&debug=true&key=${config.GRAPHHOPPER_KEY}`
-      )
+      .get(config.API_URL + "/geocode?locationstring="+locationstring)
       .then((res) => {
-        let data = res.data;
+        let data = res.data.data;
 
         // console.log(data.hits[0].point);
         let newpoint = [data.hits[0].point.lat, data.hits[0].point.lng];
@@ -110,7 +126,7 @@ class App extends Component {
       });
   };
 
-  moveVehicle = (direction = "up") => {
+  walk = (direction = "up") => {
     let newcenter = [
       this.state.viewport.center[0] + this.state.speed,
       this.state.viewport.center[1]
@@ -149,38 +165,80 @@ class App extends Component {
 
   startTravel = () => {
     if (this.state.route_polyline.length === 0) {
-      swal("Error", "Cannot start travel. Route not set", "warning");
+      swal("Cannot start travel","Route not set. Click on Get Route", "warning");
       return;
     }
+
+    clearInterval(this.state.travelprocess);
+
     this.setState({
+      travelprocess: null,
       viewport: {
         center: this.state.route_polyline[0]
       },
       current_routepoint: 0,
-      travel_ongoing: true
+      travel_ongoing: true,
+      travelprocess: setInterval(() => {
+        this.moveVehicle();
+      },1000)
     });
     swal(
       "Success",
-      "Travel Started. You can now move along the route",
+      "Travel Started. Happy Journey!",
       "success"
     );
   };
 
-  endTravel = () => {
+  completeTravel = () => {
+    clearInterval(this.state.travelprocess);
+
     this.setState({
+      travelprocess: null,
       route_polyline: [],
       travel_ongoing: false,
-      current_routepoint: 0
+      current_routepoint: 0,
+      totaldistance: this.state.totaldistance + this.state.currentdistance,
+      totaldistance: this.state.totalcost + this.state.currentcost,
+      currentdistance: 0,
+      currentcost: 0
+    });
+
+    window.localStorage.setItem("totaldistance",this.state.totaldistance);
+    window.localStorage.setItem("totalcost",this.state.totalcost);
+
+    swal("Success", "Travel Completed! Thanks for travelling with us", "success");
+  };
+
+  endTravel = () => {
+    clearInterval(this.state.travelprocess);
+
+    this.setState({
+      travelprocess: null,
+      route_polyline: [],
+      travel_ongoing: false,
+      current_routepoint: 0,
+      currentdistance: 0,
+      currentcost: 0
     });
     swal("Success", "Travel Ended", "success");
   };
 
-  moveRandom = () => {
+  moveVehicle = () => {
+    let speed = 1;
+
+    if(this.state.vehicletype == "INTERCITY"){
+      speed = 10;
+    }
+    else if(this.state.vehicletype == "INTERSTATE"){
+      speed = 20;
+    }
+
     const new_routepoint =
-      this.state.current_routepoint + Math.floor(Math.random() * 20 + 1);
+      this.state.current_routepoint + Math.floor(Math.random() * (speed + 1) + 1);
+
     if (new_routepoint >= this.state.route_polyline.length - 1) {
       // reached destination
-      this.endTravel();
+      this.completeTravel();
       return;
     }
     this.setState({
@@ -195,12 +253,17 @@ class App extends Component {
   render() {
     return (
       <div className="maincontainer">
-        <h3>Real World Travel Simulator</h3>
+        <h3>World Travel Simulator</h3>
         <div>
           <p>
             Set Starting Point:
-            <input type="text" id="startpoint" defaultValue="currentlocation" />
-            <button onClick={this.setStartPoint}>Get</button>
+            <input type="text" id="startpoint" defaultValue="" />
+            <button onClick={this.setStartPoint}>Set</button>
+            <button onClick={() => {
+              document.getElementById("startpoint").value = "currentlocation";
+              this.setStartPoint();
+
+            }}>Set Current Location</button>
           </p>
           <p>
             Set Destination:
@@ -208,56 +271,50 @@ class App extends Component {
             <button onClick={this.setEndPoint}>Get</button>
           </p>
           <p>
-            <button onClick={this.getRoute}>Get route</button>
+            <button className="btn btn-info" onClick={this.getRoute}>Get route</button>
           </p>
         </div>
 
         {!this.state.travel_ongoing && (
           <div className="navigation">
-            <p>
-              Current Speed:
-              <input
-                type="text"
-                defaultValue={0.0005}
-                onChange={(e) => {
-                  this.setState({ speed: parseFloat(e.target.value) });
-                }}
-              />
-            </p>
-            <button
+            <b>Simulate Walking</b>
+            <button className="btn btn-secondary"
               onClick={() => {
-                this.moveVehicle("up");
+                this.walk("up");
               }}
             >
-              Move Up
+              Walk Up
             </button>
-            <button
+            <button className="btn btn-secondary"
               onClick={() => {
-                this.moveVehicle("down");
+                this.walk("down");
               }}
             >
-              Move Down
+              Walk Down
             </button>
-            <button
+            <button className="btn btn-secondary"
               onClick={() => {
-                this.moveVehicle("left");
+                this.walk("left");
               }}
             >
-              Move Left
+              Walk Left
             </button>
-            <button
+            <button className="btn btn-secondary"
               onClick={() => {
-                this.moveVehicle("right");
+                this.walk("right");
               }}
             >
-              Move Right
+              Walk Right
             </button>
           </div>
         )}
 
         <div className="navigation">
+          <b>Current Distance: </b> {(this.state.currentdistance/1000).toFixed(2)} KM <br />
+          <b>Vehicle Type: </b> {this.state.vehicletype} <br />
+          <b>Current Cost: </b> {(this.state.currentcost).toFixed(2)} INR <br />
           {!this.state.travel_ongoing && (
-            <button
+            <button className="btn btn-success"
               onClick={() => {
                 this.startTravel();
               }}
@@ -268,14 +325,8 @@ class App extends Component {
 
           {this.state.travel_ongoing && (
             <div>
-              <button
-                onClick={() => {
-                  this.moveRandom();
-                }}
-              >
-                Move along route
-              </button>
-              <button
+              
+              <button className="btn btn-danger"
                 onClick={() => {
                   this.endTravel();
                 }}
@@ -295,7 +346,7 @@ class App extends Component {
             url="https://{s}.tile.osm.org/{z}/{x}/{y}.png"
           />
           <Marker position={this.state.viewport.center}>
-            <Popup>Player 1</Popup>
+            <Popup>Your Location</Popup>
           </Marker>
 
           {this.state.route_polyline.length > 0 && (

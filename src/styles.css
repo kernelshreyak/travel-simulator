@@ -22,3 +22,7 @@
   margin: 10px;
   background-color: whitesmoke;
 }
+
+.btn{
+  margin: 2px !important;
+}
