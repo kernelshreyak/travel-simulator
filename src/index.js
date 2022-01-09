@@ -172,7 +172,6 @@ class App extends Component {
     clearInterval(this.state.travelprocess);
 
     this.setState({
-      travelprocess: null,
       viewport: {
         center: this.state.route_polyline[0]
       },
@@ -198,7 +197,7 @@ class App extends Component {
       travel_ongoing: false,
       current_routepoint: 0,
       totaldistance: this.state.totaldistance + this.state.currentdistance,
-      totaldistance: this.state.totalcost + this.state.currentcost,
+      totalcost: this.state.totalcost + this.state.currentcost,
       currentdistance: 0,
       currentcost: 0
     });
