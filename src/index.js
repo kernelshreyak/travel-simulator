@@ -225,10 +225,10 @@ class App extends Component {
   moveVehicle = () => {
     let speed = 1;
 
-    if(this.state.vehicletype == "INTERCITY"){
+    if(this.state.vehicletype === "INTERCITY"){
       speed = 10;
     }
-    else if(this.state.vehicletype == "INTERSTATE"){
+    else if(this.state.vehicletype === "INTERSTATE"){
       speed = 20;
     }
 
