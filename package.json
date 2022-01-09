@@ -1,0 +1,23 @@
+{
+  "name": "travel-simulator",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "src/index.js",
+  "dependencies": {
+    "axios": "0.21.1",
+    "leaflet": "1.7.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-leaflet": "2.8.0",
+    "react-scripts": "1.1.4",
+    "sweetalert": "2.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
