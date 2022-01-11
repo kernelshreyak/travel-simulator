@@ -6,13 +6,14 @@ import axios from "axios";
 
 import swal from "sweetalert";
 import { config } from "./config";
-import MapNavigation, { MapNavigation2D, MapNavigation3D } from "./Map";
+import { MapNavigation2D, MapNavigation3D } from "./Map";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       speed: 0.0001,
+      isthreeD: false,
       route_polyline: [],
       travelprocess: null,
       travel_ongoing: false,
@@ -39,6 +40,14 @@ class App extends Component {
     // console.log("converted polyline", converted_polyline);
     return converted_polyline;
   };
+
+  changeView = (event) => {
+    const mapstyle3D = event.target.value === "1" ? true : false;
+    console.log("3D style: " + mapstyle3D)
+    this.setState({
+      isthreeD:  mapstyle3D
+    })
+  }
 
   getRoute = async () => {
     
@@ -276,6 +285,15 @@ class App extends Component {
 
         {!this.state.travel_ongoing && (
           <div className="navigation">
+            <p>
+              Map style: <br />
+              <select defaultValue={this.state.isthreeD ? 1 : 2} onChange={this.changeView}>
+                <option value={2}>2D</option>
+                <option value={1}>3D</option>
+              </select>
+              
+            </p>
+            
             <b>Simulate Walking</b>
             <button className="btn btn-secondary"
               onClick={() => {
@@ -336,19 +354,27 @@ class App extends Component {
           )}
         </div>
 
-        {/* <MapNavigation2D 
-          onzoomlevelschange={this.handleZoomChanged} 
-          viewport={this.state.viewport}
-          center={this.state.viewport.center}
-          positions={this.state.route_polyline}
-        /> */}
+        {
+          this.state.isthreeD ? 
+          (
+              <MapNavigation3D 
+              onzoomlevelschange={this.handleZoomChanged} 
+              viewport={this.state.viewport}
+              center={this.state.viewport.center}
+              positions={this.state.route_polyline}
+            />
+          )
+          :(
+            <MapNavigation2D 
+            onzoomlevelschange={this.handleZoomChanged} 
+            viewport={this.state.viewport}
+            center={this.state.viewport.center}
+            positions={this.state.route_polyline}
+          />
+          )
+        }
 
-        <MapNavigation3D 
-          onzoomlevelschange={this.handleZoomChanged} 
-          viewport={this.state.viewport}
-          center={this.state.viewport.center}
-          positions={this.state.route_polyline}
-        />
+       
       </div>
     );
   }
