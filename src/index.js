@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import { Map, TileLayer, Marker, Popup } from "react-leaflet";
 import "./styles.css";
 
 import axios from "axios";
-import { Polyline } from "react-leaflet";
+
 import swal from "sweetalert";
 import { config } from "./config";
+import MapNavigation, { MapNavigation2D, MapNavigation3D } from "./Map";
 
 class App extends Component {
   constructor(props) {
@@ -336,25 +336,19 @@ class App extends Component {
           )}
         </div>
 
-        <Map
-          onzoomlevelschange={this.handleZoomChanged}
+        {/* <MapNavigation2D 
+          onzoomlevelschange={this.handleZoomChanged} 
           viewport={this.state.viewport}
-        >
-          <TileLayer
-            attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.osm.org/{z}/{x}/{y}.png"
-          />
-          <Marker position={this.state.viewport.center}>
-            <Popup>Your Location</Popup>
-          </Marker>
+          center={this.state.viewport.center}
+          positions={this.state.route_polyline}
+        /> */}
 
-          {this.state.route_polyline.length > 0 && (
-            <Polyline
-              pathOptions={{ color: "red", fillColor: "red" }}
-              positions={this.state.route_polyline}
-            />
-          )}
-        </Map>
+        <MapNavigation3D 
+          onzoomlevelschange={this.handleZoomChanged} 
+          viewport={this.state.viewport}
+          center={this.state.viewport.center}
+          positions={this.state.route_polyline}
+        />
       </div>
     );
   }
