@@ -8,6 +8,8 @@ import swal from "sweetalert";
 import { config } from "./config";
 import { MapNavigation2D, MapNavigation3D } from "./Map";
 
+import StripeCheckout from 'react-stripe-checkout';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -17,6 +19,7 @@ class App extends Component {
       route_polyline: [],
       travelprocess: null,
       travel_ongoing: false,
+      paidfortravel: false,
       vehicletype: "INTRACITY", // Intra-City, Inter-City and Inter-State
       totalcost: 0, //Rupees
       currentcost: 0,
@@ -204,6 +207,7 @@ class App extends Component {
       travelprocess: null,
       route_polyline: [],
       travel_ongoing: false,
+      paidfortravel: false,
       current_routepoint: 0,
       totaldistance: this.state.totaldistance + this.state.currentdistance,
       totalcost: this.state.totalcost + this.state.currentcost,
@@ -224,6 +228,7 @@ class App extends Component {
       travelprocess: null,
       route_polyline: [],
       travel_ongoing: false,
+      paidfortravel: false,
       current_routepoint: 0,
       currentdistance: 0,
       currentcost: 0
@@ -257,6 +262,11 @@ class App extends Component {
     });
     // console.log("New route point: ", new_routepoint);
   };
+
+  onPaySuccess = () => {
+    swal("Success","Payment successful!","success");
+    this.setState({paidfortravel: true});
+  }
 
   render() {
     return (
@@ -330,7 +340,18 @@ class App extends Component {
           <b>Current Distance: </b> {(this.state.currentdistance/1000).toFixed(2)} KM <br />
           <b>Vehicle Type: </b> {this.state.vehicletype} <br />
           <b>Current Cost: </b> {(this.state.currentcost).toFixed(2)} INR <br />
-          {!this.state.travel_ongoing && (
+          {this.state.currentdistance > 0 && !this.state.travel_ongoing && !this.state.paidfortravel && (
+            <StripeCheckout
+              name="Pay for Travel"
+              description={`Payment for ${(this.state.currentdistance/1000).toFixed(2)} KM Travel on World Travel Simulator`}
+              token={this.onPaySuccess}
+              stripeKey="pk_test_1QzyNpfbEm3HOOwTasbLFj8k"
+              amount={this.state.currentcost*100} // cents
+              currency="INR"
+            />
+          )}
+
+          {!this.state.travel_ongoing && this.state.paidfortravel && (
             <button className="btn btn-success"
               onClick={() => {
                 this.startTravel();
