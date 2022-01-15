@@ -285,14 +285,14 @@ class App extends Component {
 
         {!this.state.travel_ongoing && (
           <div className="navigation">
-            <p>
+            {/*<p>
               Map style: <br />
               <select defaultValue={this.state.isthreeD ? 1 : 2} onChange={this.changeView}>
                 <option value={2}>2D</option>
                 <option value={1}>3D</option>
               </select>
               
-            </p>
+            </p>*/}
             
             <b>Simulate Walking</b>
             <button className="btn btn-secondary"
@@ -354,27 +354,23 @@ class App extends Component {
           )}
         </div>
 
-        {
-          this.state.isthreeD ? 
-          (
-              <MapNavigation3D 
+        <div style={{display: this.state.isthreeD ? "block" : "none"}}>
+           <MapNavigation3D 
               onzoomlevelschange={this.handleZoomChanged} 
               viewport={this.state.viewport}
               center={this.state.viewport.center}
               positions={this.state.route_polyline}
             />
-          )
-          :(
-            <MapNavigation2D 
+        </div>
+        <div style={{display: this.state.isthreeD ? "none" : "block"}}>
+           <MapNavigation2D 
             onzoomlevelschange={this.handleZoomChanged} 
             viewport={this.state.viewport}
             center={this.state.viewport.center}
             positions={this.state.route_polyline}
           />
-          )
-        }
-
-       
+        </div>
+  
       </div>
     );
   }
