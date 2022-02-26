@@ -28,6 +28,8 @@ class App extends Component {
       current_routepoint: 0,
       startpoint: [],
       endpoint: [],
+      departureCountry: "IN",
+      arrivalCountry: "IN",
       viewport: {
         center: [28.6828, 77.3121],
         zoom: 13
@@ -52,26 +54,56 @@ class App extends Component {
     })
   }
 
-  getRoute = async () => {
+  getRoute = async (vehicle="car") => {
     
     try {
-      const routeresponse = await axios.get(`${config.API_URL}/get_route?vehicle=car&startpointLat=${this.state.startpoint[0]}&startpointLng=${this.state.startpoint[1]}&endpointLat=${this.state.endpoint[0]}&endpointLng=${this.state.endpoint[1]}`);
+      let routeQuery = `${config.API_URL}/get_route?vehicle=${vehicle}&startpointLat=${this.state.startpoint[0]}&startpointLng=${this.state.startpoint[1]}&endpointLat=${this.state.endpoint[0]}&endpointLng=${this.state.endpoint[1]}`;
+
+      if(vehicle == "airplane"){
+        routeQuery += `&departureCountry=${this.state.departureCountry}&arrivalCountry=${this.state.arrivalCountry}`;
+      }
+      console.log(routeQuery)
+      const routeresponse = await axios.get(routeQuery);
       console.log(routeresponse.data);
-      const routeData = this.convertPolyLine(
-        routeresponse.data.data.paths[0].points.coordinates
-      );
+
+      let routeData = [];
+      if(vehicle == "car"){
+        routeData = this.convertPolyLine(
+          routeresponse.data.data.paths[0].points.coordinates
+        );
+      }
+      else{
+        routeData = this.convertPolyLine(
+          routeresponse.data.points
+        );
+      }
+        
       console.log(routeData);
 
-      const distance = routeresponse.data.data.paths[0].distance;
+      let distance = 0;
+      if(vehicle == "airplane"){
+        distance = routeresponse.data.totaldistance
+      }
+      else{
+        distance = routeresponse.data.data.paths[0].distance;
+      }
+
       let vehicletype = this.state.vehicletype;
 
-      if(distance >= 60000){
-        vehicletype = "INTERCITY";
+      if(vehicle == "airplane") vehicletype = "airplane";
+
+      if(distance > 2500*1000){
+        vehicletype = "INTERCOUNTY - AIRLINE";
       }
-      else if(distance > 100000){
+      else if(distance > 100*1000){
         vehicletype = "INTERSTATE";
       }
+      else if(distance >= 60*1000){
+        vehicletype = "INTERCITY";
+      }
       
+
+      console.log("Distance",distance)
       this.setState({ 
         route_polyline: routeData,
         vehicletype: vehicletype,
@@ -108,7 +140,8 @@ class App extends Component {
           viewport: {
             center: newpoint
           },
-          startpoint: newpoint
+          startpoint: newpoint,
+          departureCountry: data.hits[0].countrycode
         });
       })
       .catch((err) => {
@@ -129,7 +162,8 @@ class App extends Component {
         console.log("endpoint set: " + newpoint);
         swal("Success", "End Point set", "success");
         this.setState({
-          endpoint: newpoint
+          endpoint: newpoint,
+          arrivalCountry: data.hits[0].countrycode
         });
       })
       .catch((err) => {
@@ -289,7 +323,8 @@ class App extends Component {
             <button onClick={this.setEndPoint}>Get</button>
           </p>
           <p>
-            <button className="btn btn-info" onClick={this.getRoute}>Get route</button>
+            <button className="btn btn-info" onClick={() => {this.getRoute("car")}}>Get route</button>
+            <button className="btn btn-info" onClick={() => {this.getRoute("airplane")}}>Get Airline Route</button>
           </p>
         </div>
 

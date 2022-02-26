@@ -5,5 +5,6 @@ export const config = {
     INTRACITY: {name: "Intra-City",speed: "Slow",costperkm: 10},
     INTERCITY: {name: "Inter-City",speed: "Fast",costperkm: 15},
     INTERSTATE: {name: "Intra City",speed: "Very Fast",costperkm: 40},
+    "INTERCOUNTY - AIRLINE": {name: "Inter-Country Airplane",speed: "Fastest",costperkm: 100},
   }
 }

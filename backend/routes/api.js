@@ -2,6 +2,22 @@ const router = require("express").Router();
 
 const axios = require("axios");
 
+function distance(lat1, lon1, lat2, lon2, unit = "K") {
+    var radlat1 = Math.PI * lat1/180
+    var radlat2 = Math.PI * lat2/180
+    var theta = lon1-lon2
+    var radtheta = Math.PI * theta/180
+    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    if (dist > 1) {
+        dist = 1;
+    }
+    dist = Math.acos(dist)
+    dist = dist * 180/Math.PI
+    dist = dist * 60 * 1.1515
+    if (unit=="K") { dist = dist * 1.609344 }
+    // if (unit=="N") { dist = dist * 0.8684 }
+    return dist
+}
 
 router.get("/geocode",(req,res) => {
 	const locationstring = req.query.locationstring;
@@ -27,34 +43,89 @@ router.get("/get_route",(req,res) => {
 	const startpointLng = req.query.startpointLng;
 	const endpointLat = req.query.endpointLat;
 	const endpointLng = req.query.endpointLng;
+	const departureCountry = req.query.departureCountry;
+	const arrivalCounty = req.query.arrivalCounty;
 	const vehicle = req.query.vehicle;
 
-	const url = `https://graphhopper.com/api/1/route?point=${startpointLat}%2C${startpointLng}&point=${endpointLat}%2C${endpointLng}1&vehicle=${vehicle}&debug=false&locale=en&points_encoded=false&instructions=false&elevation=false&optimize=false&key=${process.env.GRAPHHOPPER_KEY}`;
+	if(vehicle == "car"){
+		const url = `https://graphhopper.com/api/1/route?point=${startpointLat}%2C${startpointLng}&point=${endpointLat}%2C${endpointLng}1&vehicle=${vehicle}&debug=false&locale=en&points_encoded=false&instructions=false&elevation=false&optimize=false&key=${process.env.GRAPHHOPPER_KEY}`;
 
-	axios.get(url)
-	.then(resp => {
-		res.json({
-			status: "success",
-			data: resp.data
-		});
-	})
-	.catch(err => {
-		console.error(err);
-		res.send(500).json({
+		axios.get(url)
+		.then(resp => {
+			res.json({
+				status: "success",
+				data: resp.data
+			});
+		})
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({
+				status: "error",
+				message: err.message
+			});
+		})
+	}
+
+
+	else if(vehicle == "airplane"){
+		const _ = require("lodash");
+		const fs = require("fs");
+
+		const allAirPorts = JSON.parse(fs.readFileSync("./airports.json"));
+		if(allAirPorts.length == 0) throw new Error("No airports found!");
+
+		// get a route for airline travelling between airports stored in system
+
+		try{
+			// get nearest airport to startpoint, throw error if not found
+			const airportsInStartCountry = _.filter(allAirPorts,{iso_country: departureCountry});
+			// console.log("airportsInStartCountry",airportsInStartCountry);
+			const departureAirport = _.find(allAirPorts,function(airport){
+				const d = distance(startpointLat,startpointLng,airport.latitude_deg,airport.longitude_deg);
+				// console.log(`Distance from ${airport.name} = ${d}`)
+				return d <= 30
+			});
+			console.log("departureAirport",departureAirport);
+			if(!departureAirport) throw new Error("Departure airport not found");
+
+			// get nearest airport to endpoint, throw error if not found
+			const airportsInEndCountry = _.filter(allAirPorts,{iso_country: arrivalCounty});
+			// console.log("airportsInEndCountry",airportsInEndCountry);
+			const arrivalAirport = _.find(allAirPorts,function(airport){
+				const d = distance(endpointLat,endpointLng,airport.latitude_deg,airport.longitude_deg);
+				// console.log(`Distance from ${airport.name} = ${d}`)
+				return d <= 30
+			});
+			console.log("arrivalAirport",arrivalAirport);
+			if(!arrivalAirport) throw new Error("Arrival airport not found");
+
+			res.json({
+				status: "success",
+				points: [
+					[departureAirport.longitude_deg,departureAirport.latitude_deg],
+					[arrivalAirport.longitude_deg,arrivalAirport.latitude_deg],
+				],
+				totaldistance: distance(departureAirport.latitude_deg,departureAirport.longitude_deg,
+					arrivalAirport.latitude_deg,arrivalAirport.longitude_deg) * 1000
+			});
+		}
+		catch(err){
+			console.error(err);
+			res.status(500).json({
+				status: "error",
+				message: err.message
+			});
+		}
+	}
+
+
+	else{
+		res.status(400).json({
 			status: "error",
-			message: err.message
+			message: "Invalid vehicle"
 		});
-	})
-});
-
-// get a route for airline travelling between airports stored in system
-router.get("/get_airline_route",async (req,res) => {
-	try{
-
 	}
-	catch(err){
 		
-	}
 });
 
 module.exports = router;
