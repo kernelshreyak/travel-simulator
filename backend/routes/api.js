@@ -83,7 +83,7 @@ router.get("/get_route",(req,res) => {
 			const departureAirport = _.find(allAirPorts,function(airport){
 				const d = distance(startpointLat,startpointLng,airport.latitude_deg,airport.longitude_deg);
 				// console.log(`Distance from ${airport.name} = ${d}`)
-				return d <= 30
+				return d <= 50 && (airport.type == "medium_airport" || airport.type == "large_airport")
 			});
 			console.log("departureAirport",departureAirport);
 			if(!departureAirport) throw new Error("Departure airport not found");
@@ -94,7 +94,7 @@ router.get("/get_route",(req,res) => {
 			const arrivalAirport = _.find(allAirPorts,function(airport){
 				const d = distance(endpointLat,endpointLng,airport.latitude_deg,airport.longitude_deg);
 				// console.log(`Distance from ${airport.name} = ${d}`)
-				return d <= 30
+				return d <= 50 && (airport.type == "medium_airport" || airport.type == "large_airport")
 			});
 			console.log("arrivalAirport",arrivalAirport);
 			if(!arrivalAirport) throw new Error("Arrival airport not found");
