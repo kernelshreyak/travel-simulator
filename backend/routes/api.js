@@ -46,4 +46,15 @@ router.get("/get_route",(req,res) => {
 		});
 	})
 });
+
+// get a route for airline travelling between airports stored in system
+router.get("/get_airline_route",async (req,res) => {
+	try{
+
+	}
+	catch(err){
+		
+	}
+});
+
 module.exports = router;
