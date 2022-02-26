@@ -410,14 +410,14 @@ class App extends Component {
           )}
         </div>
 
-        <div style={{display: this.state.isthreeD ? "block" : "none"}}>
+        {/*<div style={{display: this.state.isthreeD ? "block" : "none"}}>
            <MapNavigation3D 
               onzoomlevelschange={this.handleZoomChanged} 
               viewport={this.state.viewport}
               center={this.state.viewport.center}
               positions={this.state.route_polyline}
             />
-        </div>
+        </div>*/}
         <div style={{display: this.state.isthreeD ? "none" : "block"}}>
            <MapNavigation2D 
             onzoomlevelschange={this.handleZoomChanged} 
