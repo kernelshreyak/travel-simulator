@@ -1,5 +1,5 @@
 export const config = {
-  API_URL: "http://localhost:8000/api",
+  API_URL: "https://world-travel-simulator.herokuapp.com/api",
   AUTH0_CLIENTID: "hRGzWQKeaYbGv4XZcGo7m471ZU9Is9jl",
   mapVehicleTypes: {
     INTRACITY: {name: "Intra-City",speed: "Slow",costperkm: 10},
