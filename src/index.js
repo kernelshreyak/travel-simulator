@@ -7,7 +7,6 @@ import axios from "axios";
 import swal from "sweetalert";
 import { config } from "./config";
 import { MapNavigation2D, MapNavigation3D } from "./Map";
-
 import StripeCheckout from 'react-stripe-checkout';
 
 class App extends Component {
@@ -28,6 +27,7 @@ class App extends Component {
       current_routepoint: 0,
       startpoint: [],
       endpoint: [],
+      additional_waypoints: [],
       departureCountry: "IN",
       arrivalCountry: "IN",
       viewport: {
@@ -64,21 +64,22 @@ class App extends Component {
       }
       console.log(routeQuery)
       const routeresponse = await axios.get(routeQuery);
-      console.log(routeresponse.data);
+      console.log("routeresponse",routeresponse.data);
 
-      let routeData = [];
+      let routePoints = [];
+      
+
       if(vehicle == "car"){
-        routeData = this.convertPolyLine(
-          routeresponse.data.data.paths[0].points.coordinates
-        );
+        routePoints = routeresponse.data.data.paths[0].points.coordinates;
       }
       else{
-        routeData = this.convertPolyLine(
-          routeresponse.data.points
-        );
+        routePoints = routeresponse.data.points;
+        this.additional_waypoints = routePoints; //request waypoints to be generated 
       }
-        
-      console.log(routeData);
+      
+      console.log("routePoints",routePoints);
+      
+      const routeData = this.convertPolyLine(routePoints);
 
       let distance = 0;
       if(vehicle == "airplane"){
@@ -87,6 +88,8 @@ class App extends Component {
       else{
         distance = routeresponse.data.data.paths[0].distance;
       }
+      console.log("Distance",distance)
+
 
       let vehicletype = this.state.vehicletype;
 
@@ -102,8 +105,8 @@ class App extends Component {
         vehicletype = "INTERCITY";
       }
       
-
-      console.log("Distance",distance)
+      
+      swal("Success", "Route calculated", "success");
       this.setState({ 
         route_polyline: routeData,
         vehicletype: vehicletype,
@@ -420,6 +423,7 @@ class App extends Component {
         </div>*/}
         <div style={{display: this.state.isthreeD ? "none" : "block"}}>
            <MapNavigation2D 
+            additional_waypoints={this.additional_waypoints}
             onzoomlevelschange={this.handleZoomChanged} 
             viewport={this.state.viewport}
             center={this.state.viewport.center}
