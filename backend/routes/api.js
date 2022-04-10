@@ -3,11 +3,11 @@ const router = require("express").Router();
 const axios = require("axios");
 
 function distance(lat1, lon1, lat2, lon2, unit = "K") {
-    var radlat1 = Math.PI * lat1/180
-    var radlat2 = Math.PI * lat2/180
-    var theta = lon1-lon2
-    var radtheta = Math.PI * theta/180
-    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    const radlat1 = Math.PI * lat1/180
+    const radlat2 = Math.PI * lat2/180
+    const theta = lon1-lon2
+    const radtheta = Math.PI * theta/180
+    const dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
     if (dist > 1) {
         dist = 1;
     }
