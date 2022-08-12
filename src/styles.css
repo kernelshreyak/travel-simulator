@@ -36,3 +36,17 @@
   cursor: pointer;
 }
 
+.login-container{
+  background-color: aliceblue;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  margin-top: auto;
+}
+
+.login-button{
+  font-size: 40px;
+  border-radius: 10%;
+  background-color: #04AA6D;
+}
+
