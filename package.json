@@ -5,6 +5,7 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "@auth0/auth0-react": "^1.10.2",
     "axios": "0.21.1",
     "leaflet": "1.7.1",
     "leaflet-geometryutil": "^0.10.0",

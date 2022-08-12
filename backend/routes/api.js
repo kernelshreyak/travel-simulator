@@ -24,10 +24,17 @@ router.get("/geocode",(req,res) => {
 	const url = `https://graphhopper.com/api/1/geocode?q=${locationstring}&locale=de&debug=true&key=${process.env.GRAPHHOPPER_KEY}`;
 	axios.get(url)
 	.then(resp => {
-		res.json({
-			status: "success",
-			data: resp.data
-		});
+		// Get weather of location using OpenWeatherMap API
+		const locationpoint = resp.data.hits[0].point;
+		axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${locationpoint.lat}&lon=${locationpoint.lng}&appid=${process.env.OPENWEATHERMAP_KEY}`)
+		.then(resp2 => {
+			res.json({
+				status: "success",
+				data: {...resp.data,...resp2.data}
+			});
+		})
+		.catch(err => {throw new Error(err)});
+			
 	})
 	.catch(err => {
 		console.error(err);
