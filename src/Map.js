@@ -8,51 +8,13 @@
 // import mapboxGl from "mapbox-gl";
 import React, {useEffect, useRef } from "react";
 
-import { Map, TileLayer, Marker, Popup,Polyline, useLeaflet, } from "react-leaflet";
+import { Map, TileLayer, Marker, Popup,Polyline, useLeaflet } from "react-leaflet";
 
 import * as GeoUtil from "leaflet-geometryutil";
-import {latLng} from "leaflet";
-
-// Special function to generate a fixed number of waypoints on an airline route segment(with 2 end points)
-function generateAirWayPoints(map,routePoints,waypointsCount,random=false){	
-    if(!map){
-        return [];
-    }
-	let points = routePoints;
-
-    const latlngs = routePoints.map((point) => latLng(point[1],point[0]));
-    console.log("latlngs",latlngs);
-
-    const lengths = GeoUtil.accumulatedLengths(latlngs);
-    const totalLength = lengths.reduce((a, b) => a + b, 0);
-    console.log("totalLength",totalLength);
-
-
-	if(random){
-		// generate the points at random distances apart (TODO)
-	}
-	else{
-		// generate the points at fixed distance apart
-		const interval = 50000; // 5km
-        const totalPoints = Math.floor(totalLength / interval);
-        
-        const ratios = [];
-        for (let i = 0; i <= totalPoints; i++) {
-            const ratio = i / totalPoints;
-            ratios.push(ratio);
-        }
-        console.log("ratios",ratios);
-
-        points = ratios.map((ratio) =>
-            GeoUtil.interpolateOnLine(map, latlngs, ratio)
-        );
-	}
-    console.log("Generated waypoints",points);
-	
-	if(points.length == 0) throw new Error("Could not generate waypoints");
-  
-	return points;
-}
+import {latLng,Icon,GeoJSON,marker} from "leaflet";
+import hash from "object-hash";
+import { stationsData } from "./geodata/stations";
+import { config } from "./config";
 
 
 function MapNavigation2D({center,positions,onzoomlevelschange,viewport,additional_waypoints=[]}){
@@ -60,16 +22,29 @@ function MapNavigation2D({center,positions,onzoomlevelschange,viewport,additiona
     const leaflet = useLeaflet();
 
     const mapref = useRef(null);
-
+    
     useEffect(() => {
         const map = mapref.current.contextValue.map;
+        const stationIcon = new Icon({
+            iconUrl: config.APP_URL + "/images/trainstation.png"
+        });
 
-        console.log("positions",positions);
-        console.log("map",map);
-        if(additional_waypoints.length > 0){
-            console.log("map",leaflet);
-            positions = generateAirWayPoints(map,positions);
-        }
+        const stationsGeojson = new GeoJSON(stationsData,{
+            pointToLayer: (feature,latlng) => {
+                return marker(latlng,{
+                    icon: stationIcon
+                })
+            },
+        });
+        stationsGeojson.addTo(map);
+
+
+        // console.log("positions",positions);
+        // console.log("map",map);
+        // if(additional_waypoints.length > 0){
+        //     console.log("map",leaflet);
+        //     positions = generateAirWayPoints(map,positions);
+        // }
             
     },[positions]);
 
@@ -79,10 +54,12 @@ function MapNavigation2D({center,positions,onzoomlevelschange,viewport,additiona
           viewport={viewport}
           ref={mapref}
         >
+            
             <TileLayer
                 attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.osm.org/{z}/{x}/{y}.png"
             />
+            {/* <GeoJSON key={hash(stationsData)} data={stationsData}  /> */}
 
             <Marker position={center}>
                 <Popup>Your Location</Popup>
