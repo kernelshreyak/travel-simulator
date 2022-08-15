@@ -21,11 +21,14 @@ function distance(lat1, lon1, lat2, lon2, unit = "K") {
     return dist
 }
 
-// Special function to generate a fixed number of waypoints on an airline route segment(with 2 end points)
+/**
+ * Generates a fixed number of waypoints on an airline route segment(with 2 end points)
+ * @param {*} routePoints (array of start and end point coordinates)
+ * @param {*} waypointsCount (number of waypoints to generate)
+ * @param {*} random (whether random distance apart)
+ * @returns 
+ */
 function generateAirWayPoints(map,routePoints,waypointsCount,random=false){	
-    if(!map){
-        return [];
-    }
 	let points = routePoints;
 
     const latlngs = routePoints.map((point) => latLng(point[1],point[0]));
@@ -60,6 +63,23 @@ function generateAirWayPoints(map,routePoints,waypointsCount,random=false){
 	if(points.length == 0) throw new Error("Could not generate waypoints");
   
 	return points;
+}
+
+
+/**
+ * Returns an array of coordinates (compacted) from querying the trainroutes GeoJSON containing a valid route from start to end
+ * @param {*} startLat 
+ * @param {*} startLng 
+ * @param {*} endLat 
+ * @param {*} endLng 
+ * @returns 
+ */
+function findTrainRoute(startLat,startLng,endLat,endLng){
+	try {
+		
+	} catch (error) {
+		return [];
+	}
 }
 
 router.get("/geocode",(req,res) => {
@@ -130,7 +150,7 @@ router.get("/get_route",(req,res) => {
 			const departureStation = _.find(allStations,function(station){
 				const d = distance(startpointLat,startpointLng,station.latitude_deg,station.longitude_deg);
 				// console.log(`Distance from ${station.name} = ${d}`)
-				return d <= 15
+				return d <= 25
 			});
 			console.log("departureStation",departureStation);
 			if(!departureStation) throw new Error("Departure station not found");
@@ -139,17 +159,19 @@ router.get("/get_route",(req,res) => {
 			const arrivalStation = _.find(allStations,function(station){
 				const d = distance(endpointLat,endpointLng,station.latitude_deg,station.longitude_deg);
 				// console.log(`Distance from ${station.name} = ${d}`)
-				return d <= 15
+				return d <= 25
 			});
 			console.log("arrivalStation",arrivalStation);
 			if(!arrivalStation) throw new Error("Arrival station not found");
 
 			res.json({
 				status: "success",
-				points: [
-					[departureStation.longitude_deg,departureStation.latitude_deg],
-					[arrivalStation.longitude_deg,arrivalStation.latitude_deg],
-				],
+				points: 
+					findTrainRoute(departureStation.latitude_deg,departureStation.longitude_deg,arrivalStation.latitude_deg,arrivalStation.longitude_deg),
+				// [
+				// 	[departureStation.longitude_deg,departureStation.latitude_deg],
+				// 	[arrivalStation.longitude_deg,arrivalStation.latitude_deg],
+				// ],
 				totaldistance: distance(departureStation.latitude_deg,departureStation.longitude_deg,
 					arrivalStation.latitude_deg,arrivalStation.longitude_deg) * 1000
 			});

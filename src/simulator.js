@@ -96,15 +96,20 @@ class Simulator extends Component {
         if(vehicle == "airplane") vehicletype = "airplane";
         else if(vehicle == "train") vehicletype = "train"
   
-        if(distance > 2500*1000){
-          vehicletype = "INTERCOUNTY - AIRLINE";
+        if(vehicletype == "train"){
+          vehicletype = "TRAIN";
         }
-        else if(distance > 100*1000){
-          vehicletype = "INTERSTATE";
-        }
-        else if(distance >= 60*1000){
-          vehicletype = "INTERCITY";
-        }
+        else{
+          if(distance > 2500*1000){
+            vehicletype = "INTERCOUNTY - AIRLINE";
+          }
+          else if(distance > 100*1000){
+            vehicletype = "INTERSTATE";
+          }
+          else if(distance >= 60*1000){
+            vehicletype = "INTERCITY";
+          }
+        } 
         
         
         swal("Success", "Route calculated", "success");
@@ -282,6 +287,9 @@ class Simulator extends Component {
       }
       else if(this.state.vehicletype === "INTERSTATE"){
         speed = 20;
+      }
+      else if(this.state.vehicletype === "TRAIN"){
+        speed = 35;
       }
   
       const new_routepoint =
