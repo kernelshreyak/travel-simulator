@@ -89,22 +89,52 @@ function findTrainRoute(startLat,startLng,endLat,endLng){
 	// console.log(lineStrings)
 
 	// search all linestrings to get nearest matching linestring to start point (departure station)
-	const startLS = _.find(lineStrings, (o) => {
+	let startLS = _.find(lineStrings, (o) => {
 		return _.find(o.coordinates,(c) => {
-			return distance(startLat,startLng,c[1],c[0]) <= 1;
+			// console.log(distance(startLat,startLng,c[1],c[0]))
+			const d2 = distance(startLat,startLng,c[1],c[0]);
+			return d2 <= 5;
 		})
 	});
 
 	// search all linestrings to get nearest matching linestring to end point (arrival station)
-	const endLS = _.find(lineStrings, (o) => {
+	let endLS = _.find(lineStrings, (o) => {
 		return _.find(o.coordinates,(c) => {
-			return distance(endLat,endLng,c[1],c[0]) <= 1;
-		})
+			const d2 =  distance(endLat,endLng,c[1],c[0]);
+			return d2 <= 5;
+		});
 	});
 
+	if(!endLS || !startLS) throw new Error("No valid train route found. Message 1");
+
+	// filter coordinates array to start from nearest point to departure/arrival point only
+	function filterCoordinates(coordinates_arr,pointLat,pointLng){
+		let filtered_coordinates = [];
+		let found_nearest = false;
+
+		for(let i=0;i < coordinates_arr.length; i++){
+			// start only when nearest point reached
+			const d3 =  distance(pointLat,pointLng,coordinates_arr[i][1],coordinates_arr[i][0]);
+			if(d3 <= 5 && !found_nearest) {
+				filtered_coordinates.push(coordinates_arr[i]);
+				found_nearest = true;
+				continue;
+			}
+			if(found_nearest) filtered_coordinates.push(coordinates_arr[i]); //record all after found
+		}
+
+		return filtered_coordinates;
+	}
+
+	startLS.coordinates = filterCoordinates(startLS.coordinates,startLat,startLng);
+	endLS.coordinates = filterCoordinates(endLS.coordinates,endLat,endLng);
+	
+
+	// compactify to 1D array
 	const finalTrainRoute = [...startLS.coordinates,...endLS.coordinates];
 	console.log("finalTrainRoute",finalTrainRoute);
-	if(finalTrainRoute.length == 0) throw new Error("No valid train route found");
+
+	if(finalTrainRoute.length == 0) throw new Error("No valid train route found. Message 2");
 	return finalTrainRoute;
 }
 
@@ -176,7 +206,8 @@ router.get("/get_route",(req,res) => {
 			const departureStation = _.find(allStations,function(station){
 				const d = distance(startpointLat,startpointLng,station.latitude_deg,station.longitude_deg);
 				// console.log(`Distance from ${station.name} = ${d}`)
-				return d <= 25
+				if(station.name == "Station") return false;
+				return d <= 5 || d <= 10 || d <= 15 || d <= 20 || d <= 25;
 			});
 			console.log("departureStation",departureStation);
 			if(!departureStation) throw new Error("Departure station not found");
@@ -185,7 +216,8 @@ router.get("/get_route",(req,res) => {
 			const arrivalStation = _.find(allStations,function(station){
 				const d = distance(endpointLat,endpointLng,station.latitude_deg,station.longitude_deg);
 				// console.log(`Distance from ${station.name} = ${d}`)
-				return d <= 25
+				if(station.name == "Station") return false;
+				return d <= 5 || d <= 10 || d <= 15 || d <= 20 || d <= 25;
 			});
 			console.log("arrivalStation",arrivalStation);
 			if(!arrivalStation) throw new Error("Arrival station not found");

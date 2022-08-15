@@ -13,7 +13,6 @@ import { Map, TileLayer, Marker, Popup,Polyline, useLeaflet } from "react-leafle
 import * as GeoUtil from "leaflet-geometryutil";
 import {latLng,Icon,GeoJSON,marker} from "leaflet";
 import hash from "object-hash";
-import { stationsData } from "./geodata/stations";
 import { config } from "./config";
 
 
@@ -25,19 +24,6 @@ function MapNavigation2D({center,positions,onzoomlevelschange,viewport,additiona
     
     useEffect(() => {
         const map = mapref.current.contextValue.map;
-        const stationIcon = new Icon({
-            iconUrl: config.APP_URL + "/images/trainstation.png"
-        });
-
-        const stationsGeojson = new GeoJSON(stationsData,{
-            pointToLayer: (feature,latlng) => {
-                return marker(latlng,{
-                    icon: stationIcon
-                })
-            },
-        });
-        stationsGeojson.addTo(map);
-
 
         // console.log("positions",positions);
         // console.log("map",map);
