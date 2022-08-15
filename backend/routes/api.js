@@ -75,11 +75,37 @@ function generateAirWayPoints(map,routePoints,waypointsCount,random=false){
  * @returns 
  */
 function findTrainRoute(startLat,startLng,endLat,endLng){
-	try {
-		
-	} catch (error) {
-		return [];
-	}
+	let allTrainRoutes = JSON.parse(fs.readFileSync("./trainroutes.geojson"));
+	allTrainRoutes = allTrainRoutes.features;
+	if(allTrainRoutes.length == 0) throw new Error("No train routes found!");
+
+	// get all linestrings
+	const lineStrings = allTrainRoutes.map(o => {
+		return {
+			number: o.properties.number,
+			coordinates: o.geometry.coordinates,
+		}
+	});
+	// console.log(lineStrings)
+
+	// search all linestrings to get nearest matching linestring to start point (departure station)
+	const startLS = _.find(lineStrings, (o) => {
+		return _.find(o.coordinates,(c) => {
+			return distance(startLat,startLng,c[1],c[0]) <= 1;
+		})
+	});
+
+	// search all linestrings to get nearest matching linestring to end point (arrival station)
+	const endLS = _.find(lineStrings, (o) => {
+		return _.find(o.coordinates,(c) => {
+			return distance(endLat,endLng,c[1],c[0]) <= 1;
+		})
+	});
+
+	const finalTrainRoute = [...startLS.coordinates,...endLS.coordinates];
+	console.log("finalTrainRoute",finalTrainRoute);
+	if(finalTrainRoute.length == 0) throw new Error("No valid train route found");
+	return finalTrainRoute;
 }
 
 router.get("/geocode",(req,res) => {
@@ -177,7 +203,7 @@ router.get("/get_route",(req,res) => {
 			});
 
 		} catch (error) {
-			console.error(error)
+			// console.error(error)
 			res.status(500).json({
 				status: "error",
 				message: error.message

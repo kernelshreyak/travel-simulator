@@ -289,7 +289,7 @@ class Simulator extends Component {
         speed = 20;
       }
       else if(this.state.vehicletype === "TRAIN"){
-        speed = 35;
+        speed = 5;  //this is slow because waypoints are sparse 
       }
   
       const new_routepoint =
