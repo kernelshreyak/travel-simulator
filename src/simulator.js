@@ -82,7 +82,7 @@ class Simulator extends Component {
         const routeData = this.convertPolyLine(routePoints);
   
         let distance = 0;
-        if(vehicle == "airplane"){
+        if(vehicle == "airplane" || vehicle == "train"){
           distance = routeresponse.data.totaldistance
         }
         else{
@@ -94,6 +94,7 @@ class Simulator extends Component {
         let vehicletype = this.state.vehicletype;
   
         if(vehicle == "airplane") vehicletype = "airplane";
+        else if(vehicle == "train") vehicletype = "train"
   
         if(distance > 2500*1000){
           vehicletype = "INTERCOUNTY - AIRLINE";
@@ -327,6 +328,7 @@ class Simulator extends Component {
             </p>
             <p>
               <button className="btn btn-info" onClick={() => {this.getRoute("car")}}>Get route</button>
+              <button className="btn btn-info" onClick={() => {this.getRoute("train")}}>Get Train Route</button>
               <button className="btn btn-info" onClick={() => {this.getRoute("airplane")}}>Get Airline Route</button>
             </p>
           </div>
