@@ -332,7 +332,7 @@ class Simulator extends Component {
             <p>
               Set Destination:
               <input type="text" id="endpoint" />
-              <button onClick={this.setEndPoint}>Get</button>
+              <button onClick={this.setEndPoint}>Set</button>
             </p>
             <p>
               <button className="btn btn-info" onClick={() => {this.getRoute("car")}}>Get route</button>
