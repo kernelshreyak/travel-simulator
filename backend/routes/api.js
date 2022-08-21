@@ -109,7 +109,7 @@ function findTrainRoute(startLat,startLng,endLat,endLng){
 	if(!endLS || !startLS) throw new Error("No valid train route found. Message 1");
 
 	// filter coordinates array to start from nearest point to departure/arrival point only
-	function filterCoordinates(coordinates_arr,pointLat,pointLng){
+	function filterCoordinatesArray(coordinates_arr,pointLat,pointLng){
 		let filtered_coordinates = [];
 		let found_nearest = false;
 
@@ -127,8 +127,8 @@ function findTrainRoute(startLat,startLng,endLat,endLng){
 		return filtered_coordinates;
 	}
 
-	startLS.coordinates = filterCoordinates(startLS.coordinates,startLat,startLng);
-	endLS.coordinates = filterCoordinates(endLS.coordinates,endLat,endLng);
+	startLS.coordinates = filterCoordinatesArray(startLS.coordinates,startLat,startLng);
+	endLS.coordinates = filterCoordinatesArray(endLS.coordinates,endLat,endLng);
 	
 
 	// compactify to 1D array
