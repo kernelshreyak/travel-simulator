@@ -4,35 +4,13 @@
     Can use any JavaScript map library. Currently uses Leaflet
 
 */
-// import mapboxgl from "mapbox-gl";
-// import mapboxGl from "mapbox-gl";
-import React, {useEffect, useRef } from "react";
+import React, {useRef } from "react";
 
-import { Map, TileLayer, Marker, Popup,Polyline, useLeaflet } from "react-leaflet";
+import { Map, TileLayer, Marker, Popup,Polyline } from "react-leaflet";
 
-import * as GeoUtil from "leaflet-geometryutil";
-import {latLng,Icon,GeoJSON,marker} from "leaflet";
-import hash from "object-hash";
-import { config } from "./config";
-
-
-function MapNavigation2D({center,positions,onzoomlevelschange,viewport,additional_waypoints=[]}){
-
-    const leaflet = useLeaflet();
+function MapNavigation2D({center,positions,onzoomlevelschange,viewport}){
 
     const mapref = useRef(null);
-    
-    useEffect(() => {
-        const map = mapref.current.contextValue.map;
-
-        // console.log("positions",positions);
-        // console.log("map",map);
-        // if(additional_waypoints.length > 0){
-        //     console.log("map",leaflet);
-        //     positions = generateAirWayPoints(map,positions);
-        // }
-            
-    },[positions]);
 
     return (
         <Map
@@ -62,6 +40,5 @@ function MapNavigation2D({center,positions,onzoomlevelschange,viewport,additiona
 }
 
 export {
-    MapNavigation2D,
-    // MapNavigation3D
+    MapNavigation2D
 }
