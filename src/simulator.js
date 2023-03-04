@@ -5,7 +5,7 @@ import axios from "axios";
 
 import swal from "sweetalert";
 import { config } from "./config";
-import { MapNavigation2D, MapNavigation3D } from "./Map";
+import { MapNavigation2D } from "./Map";
 import StripeCheckout from 'react-stripe-checkout';
 import { withAuthenticationRequired } from "@auth0/auth0-react";
 
@@ -39,20 +39,11 @@ class Simulator extends Component {
   
     convertPolyLine = (polyline) => {
       const converted_polyline = [];
-      for (let i = 0; i < polyline.length; i++) {
-        converted_polyline.push([polyline[i][1], polyline[i][0]]);
+      for (const element of polyline) {
+        converted_polyline.push([element[1], element[0]]);
       }
-      // console.log("converted polyline", converted_polyline);
       return converted_polyline;
     };
-  
-    changeView = (event) => {
-      const mapstyle3D = event.target.value === "1" ? true : false;
-      console.log("3D style: " + mapstyle3D)
-      this.setState({
-        isthreeD:  mapstyle3D
-      })
-    }
   
     getRoute = async (vehicle="car") => {
       
@@ -111,7 +102,6 @@ class Simulator extends Component {
           }
         } 
         
-        
         swal("Success", "Route calculated", "success");
         this.setState({ 
           route_polyline: routeData,
@@ -140,8 +130,6 @@ class Simulator extends Component {
         .get(config.API_URL + "/geocode?locationstring="+locationstring)
         .then((res) => {
           let data = res.data.data;
-  
-          // console.log(data.hits[0].point);
           let newpoint = [data.hits[0].point.lat, data.hits[0].point.lng];
           console.log("startpoint set: " + newpoint);
           swal("Success", "Start Point set", "success");
@@ -165,8 +153,6 @@ class Simulator extends Component {
         .get(config.API_URL + "/geocode?locationstring="+locationstring)
         .then((res) => {
           let data = res.data.data;
-  
-          // console.log(data.hits[0].point);
           let newpoint = [data.hits[0].point.lat, data.hits[0].point.lng];
           console.log("endpoint set: " + newpoint);
           swal("Success", "End Point set", "success");
@@ -186,8 +172,7 @@ class Simulator extends Component {
         this.state.viewport.center[0] + this.state.speed,
         this.state.viewport.center[1]
       ];
-      if (direction === "up") {
-      } else if (direction === "down") {
+      if (direction === "down") {
         newcenter = [
           this.state.viewport.center[0] - this.state.speed,
           this.state.viewport.center[1]
@@ -306,7 +291,6 @@ class Simulator extends Component {
         },
         current_routepoint: new_routepoint
       });
-      // console.log("New route point: ", new_routepoint);
     };
   
     onPaySuccess = () => {

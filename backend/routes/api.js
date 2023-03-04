@@ -17,7 +17,6 @@ function distance(lat1, lon1, lat2, lon2, unit = "K") {
     dist = dist * 180/Math.PI
     dist = dist * 60 * 1.1515
     if (unit=="K") { dist = dist * 1.609344 }
-    // if (unit=="N") { dist = dist * 0.8684 }
     return dist
 }
 
@@ -88,7 +87,8 @@ function findTrainRoute(startLat,startLng,endLat,endLng){
 			coordinates: o.geometry.coordinates,
 		}
 	});
-	// console.log(lineStrings)
+
+	// TODO: https://github.com/kernelshreyak/world-travel-simulator/issues/10
 
 	// get linestring containing the start point (departure station)
 	let startLS = _.find(lineStrings, (o) => {
@@ -113,15 +113,15 @@ function findTrainRoute(startLat,startLng,endLat,endLng){
 		let filtered_coordinates = [];
 		let found_nearest = false;
 
-		for(let i=0;i < coordinates_arr.length; i++){
+		for(const element of coordinates_arr){
 			// start only when nearest point reached (exact search)
-			if(coordinates_arr[i][1] == pointLat && coordinates_arr[i][0] == pointLng) {
-				filtered_coordinates.push(coordinates_arr[i]);
+			if(element[1] == pointLat && element[0] == pointLng) {
+				filtered_coordinates.push(element);
 				found_nearest = true;
 				continue;
 			}
 
-			if(found_nearest) filtered_coordinates.push(coordinates_arr[i]); //record all after found
+			if(found_nearest) filtered_coordinates.push(element); //record all after found
 		}
 
 		return filtered_coordinates;
@@ -129,11 +129,9 @@ function findTrainRoute(startLat,startLng,endLat,endLng){
 
 	startLS.coordinates = filterCoordinatesArray(startLS.coordinates,startLat,startLng);
 	endLS.coordinates = filterCoordinatesArray(endLS.coordinates,endLat,endLng);
-	
 
 	// compactify to 1D array
 	const finalTrainRoute = [...startLS.coordinates,...endLS.coordinates.reverse()];
-	// console.log("finalTrainRoute",finalTrainRoute);
 
 	if(finalTrainRoute.length == 0) throw new Error("No valid train route found. Message 2");
 	return finalTrainRoute;
@@ -170,8 +168,6 @@ router.get("/get_route",(req,res) => {
 	const startpointLng = req.query.startpointLng;
 	const endpointLat = req.query.endpointLat;
 	const endpointLng = req.query.endpointLng;
-	const departureCountry = req.query.departureCountry;
-	const arrivalCounty = req.query.arrivalCounty;
 	const vehicle = req.query.vehicle;
 
 	console.log("Route type: ",vehicle);
@@ -253,8 +249,6 @@ router.get("/get_route",(req,res) => {
 
 		try{
 			// get nearest airport to startpoint, throw error if not found
-			const airportsInStartCountry = _.filter(allAirPorts,{iso_country: departureCountry});
-			// console.log("airportsInStartCountry",airportsInStartCountry);
 			const departureAirport = _.find(allAirPorts,function(airport){
 				const d = distance(startpointLat,startpointLng,airport.latitude_deg,airport.longitude_deg);
 				// console.log(`Distance from ${airport.name} = ${d}`)
@@ -264,8 +258,6 @@ router.get("/get_route",(req,res) => {
 			if(!departureAirport) throw new Error("Departure airport not found");
 
 			// get nearest airport to endpoint, throw error if not found
-			const airportsInEndCountry = _.filter(allAirPorts,{iso_country: arrivalCounty});
-			// console.log("airportsInEndCountry",airportsInEndCountry);
 			const arrivalAirport = _.find(allAirPorts,function(airport){
 				const d = distance(endpointLat,endpointLng,airport.latitude_deg,airport.longitude_deg);
 				// console.log(`Distance from ${airport.name} = ${d}`)
