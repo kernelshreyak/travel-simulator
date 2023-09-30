@@ -1,6 +1,6 @@
 export const config = {
-  // API_URL: "https://world-travelsim-backend.onrender.com/api",
-  API_URL: "http://localhost:8000/api",
+  API_URL: "https://world-travelsim-backend.onrender.com/api",
+  // API_URL: "http://localhost:8000/api",
   AUTH0_DOMAIN: "dev-jpr60ht5.us.auth0.com",
   AUTH0_CLIENTID: "s0OzlM1MElFjdjtNgq8fwVBsD2Ko3jiG",
   APP_URL: "http://localhost:3000",
