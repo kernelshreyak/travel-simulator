@@ -1,5 +1,5 @@
 const { generateFixedDistancePointsOnLine } = require("./heaversine-functions");
-
+const fs = require("fs");
 /**
  * Returns an array of coordinates (compacted) from querying the trainroutes GeoJSON containing a valid route from start to end
  * @param {*} startLat
@@ -76,7 +76,7 @@ function findTrainRoute(startLat, startLng, endLat, endLng) {
     ...endLS.coordinates.reverse(),
   ];
 
-  if (finalTrainRoute.length == 0)
+  if (finalTrainRoute.length === 0)
     throw new Error("No valid train route found. Message 2");
   return finalTrainRoute;
 }

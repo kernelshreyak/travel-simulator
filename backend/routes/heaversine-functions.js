@@ -21,7 +21,6 @@ function generateFixedDistancePointsOnLine(lat1, lon1, lat2, lon2, distance) {
   lon2 = parseFloat(lon2);
   const points = [];
   const totalDistance = calculateDistance(lat1, lon1, lat2, lon2);
-  const azimuth = Math.atan2(lon2 - lon1, lat2 - lat1);
 
   for (let d = 0; d <= totalDistance; d += distance) {
     const fraction = d / totalDistance;
