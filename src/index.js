@@ -1,30 +1,17 @@
-import React  from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import "./styles.css";
-import { Auth0Provider,useAuth0 } from "@auth0/auth0-react";
-
-import axios from "axios";
+import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 
 import { config } from "./config";
 import Simulator from "./simulator";
 import Login from "./login";
 
-
 function App() {
-  const {
-    isAuthenticated,
-    isLoading,
-    loginWithRedirect,
-    user
-  } = useAuth0();
+  const { isAuthenticated, user } = useAuth0();
 
-  return (<div>
-    {
-      isAuthenticated && user ? <Simulator /> : <Login />
-    }
-  </div>)
+  return <div>{isAuthenticated && user ? <Simulator /> : <Login />}</div>;
 }
-
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(
@@ -33,6 +20,7 @@ ReactDOM.render(
     clientId={config.AUTH0_CLIENTID}
     redirectUri={config.APP_URL}
   >
-   <App />
-  </Auth0Provider>
-  , rootElement);
+    <App />
+  </Auth0Provider>,
+  rootElement
+);

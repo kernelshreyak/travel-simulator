@@ -50,7 +50,7 @@ class Simulator extends Component {
       try {
         let routeQuery = `${config.API_URL}/get_route?vehicle=${vehicle}&startpointLat=${this.state.startpoint[0]}&startpointLng=${this.state.startpoint[1]}&endpointLat=${this.state.endpoint[0]}&endpointLng=${this.state.endpoint[1]}`;
   
-        if(vehicle == "airplane"){
+        if(vehicle === "airplane"){
           routeQuery += `&departureCountry=${this.state.departureCountry}&arrivalCountry=${this.state.arrivalCountry}`;
         }
         console.log(routeQuery)
@@ -60,7 +60,7 @@ class Simulator extends Component {
         let routePoints = [];
         
   
-        if(vehicle == "car"){
+        if(vehicle === "car"){
           routePoints = routeresponse.data.data.paths[0].points.coordinates;
         }
         else{
@@ -73,7 +73,7 @@ class Simulator extends Component {
         const routeData = this.convertPolyLine(routePoints);
   
         let distance = 0;
-        if(vehicle == "airplane" || vehicle == "train"){
+        if(vehicle === "airplane" || vehicle === "train"){
           distance = routeresponse.data.totaldistance
         }
         else{
@@ -84,10 +84,10 @@ class Simulator extends Component {
   
         let vehicletype = this.state.vehicletype;
   
-        if(vehicle == "airplane") vehicletype = "airplane";
-        else if(vehicle == "train") vehicletype = "train"
+        if(vehicle === "airplane") vehicletype = "airplane";
+        else if(vehicle === "train") vehicletype = "train"
   
-        if(vehicletype == "train"){
+        if(vehicletype === "train"){
           vehicletype = "TRAIN";
         }
         else{
