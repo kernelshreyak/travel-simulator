@@ -1,30 +1,36 @@
-function haversineDistance(coords1, coords2, isMiles) {
-    function toRad(x) {
-      return x * Math.PI / 180;
-    }
-  
-    var lon1 = coords1[1];
-    var lat1 = coords1[0];
-  
-    var lon2 = coords2[1];
-    var lat2 = coords2[0];
-  
-    var R = 6371; // km
-  
-    var x1 = lat2 - lat1;
-    var dLat = toRad(x1);
-    var x2 = lon2 - lon1;
-    var dLon = toRad(x2)
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c;
-  
-    if(isMiles) d /= 1.60934;
-  
-    return d;
-  }
+const {
+  generateFixedDistancePointsOnLine,
+} = require("./routes/heaversine-functions");
 
-  const distance = haversineDistance([28.7041,77.1025],[40.7128,74.0060],false);
-  console.log("Distance (km): " + distance)
+// Example coordinates (New York to Los Angeles)
+// const startLat = 40.7128;
+// const startLon = -74.006;
+// const endLat = 34.0522;
+// const endLon = -118.2437;
+
+// Example coordinates (New York to Delhi)
+const startLat = 40.7128;
+const startLon = -74.006;
+const endLat = 28.6139;
+const endLon = 77.209;
+
+// Fixed distance between points (in kilometers)
+const fixedDistance = 100;
+
+// Generate points that are fixed distance apart on the line segment
+const fixedDistancePoints = generateFixedDistancePointsOnLine(
+  startLat,
+  startLon,
+  endLat,
+  endLon,
+  fixedDistance
+);
+
+// Create a GeoJSON LineString object
+const geoJSONLineString = {
+  type: "LineString",
+  coordinates: fixedDistancePoints,
+};
+
+// Print the GeoJSON LineString as a JSON string
+console.log(JSON.stringify(geoJSONLineString));

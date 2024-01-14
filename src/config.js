@@ -9,7 +9,7 @@ export const config = {
     INTRACITY: { name: "Intra-City", speed: "Slow", costperkm: 10 },
     INTERCITY: { name: "Inter-City", speed: "Fast", costperkm: 15 },
     INTERSTATE: { name: "Inter State", speed: "Very Fast", costperkm: 40 },
-    TRAIN: { name: "Train", speed: "Very Fast", costperkm: 15 },
+    TRAIN: { name: "Train", speed: "Very Fast", costperkm: 5 },
     "INTERCOUNTY - AIRLINE": {
       name: "Inter-Country Airplane",
       speed: "Fastest",
