@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const axios = require("axios");
 const _ = require("lodash");
+const fs = require("fs");
 
 const { findTrainRoute, generateAirWayPoints } = require("./routing-functions");
 
